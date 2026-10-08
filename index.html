@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>CRACKED IRIS | Vault & Torrents</title>
+    <link rel="icon" type="image/jpeg" href="logo.jpeg" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Hanken+Grotesk:wght@400;500;600;700&display=swap"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <canvas id="ambientCanvas" aria-hidden="true"></canvas>
+
+    <!-- Neat Loading Screen Sequence -->
+    <div class="loader-overlay" id="loader">
+      <div class="loader-content">
+        <div class="tw-02" aria-label="Linux terminal startup sequence">
+          <p class="tw-02__line" style="--len: 10; --delay: 0.08s">
+            $ uname -s
+          </p>
+          <p
+            class="tw-02__line tw-02__line--output"
+            style="--len: 5; --delay: 0.26s"
+          >
+            Linux
+          </p>
+          <p class="tw-02__line" style="--len: 5; --delay: 0.38s">$ pwd</p>
+          <p
+            class="tw-02__line tw-02__line--output"
+            style="--len: 16; --delay: 0.5s"
+          >
+            /home/iris/vault
+          </p>
+          <p class="tw-02__line" style="--len: 8; --delay: 0.75s">$ ls -la</p>
+          <p
+            class="tw-02__line tw-02__line--output"
+            style="--len: 28; --delay: 0.91s"
+          >
+            assets/ index.html README.md
+          </p>
+          <p class="tw-02__line" style="--len: 21; --delay: 1.33s">
+            $ cat /etc/os-release
+          </p>
+          <p
+            class="tw-02__line tw-02__line--output"
+            style="--len: 30; --delay: 1.64s"
+          >
+            PRETTY_NAME="Ubuntu 24.04 LTS"
+          </p>
+          <p class="tw-02__line" style="--len: 13; --delay: 2.06s">
+            $ ./launch.sh
+          </p>
+          <p
+            class="tw-02__line tw-02__line--output"
+            style="--len: 13; --delay: 2.28s"
+          >
+            Vault mounted
+          </p>
+        </div>
+        <div class="loader-status" id="loaderText">UNLOCKING VAULT...</div>
+      </div>
+    </div>
+
+    <!-- Main Web Application -->
+    <div id="appContent">
+      <header>
+        <div class="wrap nav">
+          <a class="logo" href="#top" aria-label="Cracked Iris home">
+            <div
+              class="logo-img"
+              role="img"
+              aria-label="Cracked Iris Logo"
+            ></div>
+            CRACKED IRIS
+          </a>
+          <button
+            class="nav-toggle"
+            id="navToggle"
+            type="button"
+            aria-label="Toggle navigation menu"
+            aria-expanded="false"
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+          <nav class="nav-links" id="navLinks">
+            <a href="#about">About Us</a>
+            <a href="#torrents">Available Torrents</a>
+            <a href="#rules">Rules &amp; Cooldown</a>
+            <button
+              class="theme-toggle"
+              id="themeBtn"
+              aria-label="Toggle Light/Dark Theme"
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="12" cy="12" r="5" />
+                <path
+                  d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+                />
+              </svg>
+            </button>
+            <div class="music" id="music">
+              <button
+                class="theme-toggle"
+                id="musicBtn"
+                aria-label="Change background music"
+                aria-haspopup="true"
+                aria-expanded="false"
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M9 18V5l12-2v13" />
+                  <circle cx="6" cy="18" r="3" />
+                  <circle cx="18" cy="16" r="3" />
+                </svg>
+              </button>
+              <div
+                class="music-menu"
+                id="musicMenu"
+                role="menu"
+                aria-label="Background music"
+              ></div>
+            </div>
+            <a
+              class="btn pri sm"
+              href="https://discord.gg/5EupsDCawv"
+              target="_blank"
+              rel="noopener"
+              >Join Discord</a
+            >
+          </nav>
+        </div>
+      </header>
+
+      <main id="top" class="wrap">
+        <!-- Hero Section -->
+        <div class="hero">
+          <div>
+            <span class="hero-tag">Email-Based Torrent Request Vault</span>
+            <h1>
+              Hard-to-find files.<br />Direct torrent stock.<br />Yours to
+              request.
+            </h1>
+            <p>
+              CRACKED IRIS was created by students to preserve, source, and
+              deliver content that can't be easily obtained—from rare mod builds
+              to full games and public domain cinema.
+            </p>
+            <div class="row">
+              <a class="btn pri" href="#torrents">Browse Stock Catalog</a>
+              <button class="btn gh" id="hp">Play Iris Snap</button>
+            </div>
+            <div class="facts">
+              <span>Email Torrent Delivery</span>
+              <span>Cooldown System</span>
+              <span>Student Community</span>
+            </div>
+          </div>
+
+          <!-- Static, Hovering Eye Hero Display -->
+          <div class="hero-logo-container">
+            <div class="hero-glow-ring"></div>
+            <div
+              class="hero-logo-img"
+              role="img"
+              aria-label="Official Cracked Iris Emblem"
+            ></div>
+          </div>
+        </div>
+
+        <!-- About Section -->
+        <section id="about">
+          <div class="panel">
+            <h2>Who are we &amp; how do we help?</h2>
+            <p>
+              Now you might be asking: <em>"Who are we?"</em>
+              <em>"What do we do?"</em> &amp; most importantly
+              <em>"How do we?"</em>
+            </p>
+            <p>
+              We are a group of school students who founded
+              <strong>CRACKED IRIS</strong> to help users acquire rare or
+              hard-to-obtain digital content (such as Ravenfield Beta 5 mods).
+              Everyone wants stuff even if they can't easily get it—and that's
+              where we step in. Torrent links and files are dispatched via email
+              or requested inside our Discord server.
+            </p>
+            <div
+              style="
+                margin-top: 20px;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 12px;
+              "
+            >
+              <a
+                class="btn pri"
+                href="mailto:cracked.iris0992@gmail.com?subject=Torrent%20Request"
+                >Email Torrent Request</a
+              >
+              <a
+                class="btn gh"
+                href="https://discord.gg/5EupsDCawv"
+                target="_blank"
+                rel="noopener"
+                >Join Official Discord</a
+              >
+              <a
+                class="btn gh"
+                href="https://docs.google.com/document/d/1ft6Szg5hf2C2fYl3dxu4pPYPKh9LKd2BJ34zL8FhfQ4/edit?usp=sharing"
+                target="_blank"
+                rel="noopener"
+                >Read Official Rules Document</a
+              >
+            </div>
+          </div>
+        </section>
+
+        <!-- Torrents Section -->
+        <section id="torrents">
+          <h2>Available Torrents &amp; Stock</h2>
+          <p class="sub">
+            Click any item or download button to automatically generate an email
+            request for that torrent.
+          </p>
+
+          <div class="email-notice">
+            <div class="email-notice-text">
+              <b>Direct Email Torrent Requests Active</b>
+              <p style="font-size: 0.9rem; color: var(--mut)">
+                All torrent requests are sent directly to our team inbox. Click
+                any item below or email us manually:
+              </p>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center">
+              <span class="email-badge">cracked.iris0992@gmail.com</span>
+              <button class="btn gh sm" id="copyEmailBtn">Copy Email</button>
+            </div>
+          </div>
+
+          <div class="tools">
+            <div class="pills" role="group" aria-label="Filter stock">
+              <button class="pill" data-f="all" aria-pressed="true">
+                All Stock
+              </button>
+              <button class="pill" data-f="game" aria-pressed="false">
+                Games
+              </button>
+              <button class="pill" data-f="film" aria-pressed="false">
+                Movies
+              </button>
+              <button class="pill" data-f="media" aria-pressed="false">
+                MP3 / MP4
+              </button>
+            </div>
+            <input
+              type="search"
+              id="q"
+              placeholder="Search stock (e.g. Ravenfield, Resident Evil...)"
+              aria-label="Search available torrents"
+            />
+          </div>
+
+          <div class="grid" id="grid"></div>
+        </section>
+
+        <!-- Out-of-Stock Request Section -->
+        <section id="request">
+          <div class="panel request-panel">
+            <div class="request-header">
+              <div>
+                <h2>Can't find it in stock?</h2>
+                <p class="sub">
+                  Send a custom request for anything that is not currently
+                  listed. We review extra requests and try to source rare or
+                  unavailable titles when possible.
+                </p>
+              </div>
+              <a
+                class="btn pri"
+                href="mailto:cracked.iris0992@gmail.com?subject=Out%20of%20Stock%20Request&body=Name%3A%20%0D%0ARequested%20Item%3A%20%0D%0AType%3A%20Game%20/%20Movie%20/%20Music%20/%20Other%0D%0APlatform%3A%20%0D%0AReason%20or%20notes%3A%20"
+                >Request Item</a
+              >
+            </div>
+
+            <form
+              class="request-form"
+              action="mailto:cracked.iris0992@gmail.com"
+              method="post"
+              enctype="text/plain"
+            >
+              <div class="field">
+                <label for="req-name">Your name</label>
+                <input
+                  id="req-name"
+                  name="Name"
+                  type="text"
+                  placeholder="Your name"
+                />
+              </div>
+
+              <div class="field">
+                <label for="req-item">Requested item</label>
+                <input
+                  id="req-item"
+                  name="Item"
+                  type="text"
+                  placeholder="e.g. Red Dead Redemption 2"
+                />
+              </div>
+
+              <div class="field">
+                <label id="req-type-label" for="typePickerButton">Type</label>
+                <div class="custom-select" id="typePicker">
+                  <button
+                    class="custom-select-trigger"
+                    id="typePickerButton"
+                    type="button"
+                    role="combobox"
+                    aria-labelledby="req-type-label typePickerValue"
+                    aria-haspopup="listbox"
+                    aria-expanded="false"
+                    aria-controls="typePickerList"
+                  >
+                    <span id="typePickerValue">Game</span>
+                    <svg
+                      class="custom-select-chevron"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      aria-hidden="true"
+                    >
+                      <path d="m7 10 5 5 5-5" />
+                    </svg>
+                  </button>
+                  <div
+                    class="custom-select-list"
+                    id="typePickerList"
+                    role="listbox"
+                    aria-labelledby="req-type-label"
+                    aria-hidden="true"
+                  >
+                    <div
+                      class="custom-select-option"
+                      id="typeOption0"
+                      role="option"
+                      data-value="Game"
+                      aria-selected="true"
+                    >
+                      Game
+                    </div>
+                    <div
+                      class="custom-select-option"
+                      id="typeOption1"
+                      role="option"
+                      data-value="Movie"
+                      aria-selected="false"
+                    >
+                      Movie
+                    </div>
+                    <div
+                      class="custom-select-option"
+                      id="typeOption2"
+                      role="option"
+                      data-value="Music / MP3"
+                      aria-selected="false"
+                    >
+                      Music / MP3
+                    </div>
+                    <div
+                      class="custom-select-option"
+                      id="typeOption3"
+                      role="option"
+                      data-value="Video / MP4"
+                      aria-selected="false"
+                    >
+                      Video / MP4
+                    </div>
+                    <div
+                      class="custom-select-option"
+                      id="typeOption4"
+                      role="option"
+                      data-value="Other"
+                      aria-selected="false"
+                    >
+                      Other
+                    </div>
+                  </div>
+                  <select
+                    class="custom-select-native"
+                    id="req-type"
+                    name="Type"
+                    hidden
+                    aria-hidden="true"
+                    tabindex="-1"
+                  >
+                    <option>Game</option>
+                    <option>Movie</option>
+                    <option>Music / MP3</option>
+                    <option>Video / MP4</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="req-platform">Platform / version</label>
+                <input
+                  id="req-platform"
+                  name="Platform"
+                  type="text"
+                  placeholder="PC / PS4 / 1080p / etc."
+                />
+              </div>
+
+              <div class="field" style="grid-column: 1 / -1">
+                <label for="req-notes">Notes</label>
+                <textarea
+                  id="req-notes"
+                  name="Notes"
+                  placeholder="Tell us what you're looking for, preferred format, or any details that help us source it."
+                ></textarea>
+              </div>
+            </form>
+
+            <p class="request-note">
+              Custom requests are handled through email and reviewed based on
+              availability, demand, and our current request window.
+            </p>
+          </div>
+        </section>
+
+        <!-- Rules & Policy Section -->
+        <section id="rules">
+          <h2>Rules &amp; Cooldown Protocols</h2>
+          <p class="sub">
+            Make sure you understand our request system and fair distribution
+            policies.
+          </p>
+
+          <div class="rules-grid">
+            <div class="rule-box">
+              <h3>Email Request Guidelines</h3>
+              <p>
+                Send your requests directly to
+                <strong style="color: var(--tx)"
+                  >cracked.iris0992@gmail.com</strong
+                >. Include the exact name of the file or game build you need.
+                Respect the 3-day request cooldown rule.
+              </p>
+            </div>
+
+            <div class="rule-box">
+              <h3>Request Cooldown System</h3>
+              <p>
+                You cannot make unlimited requests instantly. A cooldown applies
+                per request: if you obtain a game on Sunday, you must wait until
+                Wednesday to complete another request.
+              </p>
+
+              <div class="calc-card">
+                <label
+                  style="font-size: 0.85rem; font-weight: 600; color: var(--tx)"
+                  >Request Cooldown Calculator:</label
+                >
+                <select id="daySelect">
+                  <option value="Sunday">
+                    Requested on Sunday &rarr; Next available: Wednesday
+                  </option>
+                  <option value="Monday">
+                    Requested on Monday &rarr; Next available: Thursday
+                  </option>
+                  <option value="Tuesday">
+                    Requested on Tuesday &rarr; Next available: Friday
+                  </option>
+                  <option value="Wednesday">
+                    Requested on Wednesday &rarr; Next available: Saturday
+                  </option>
+                  <option value="Thursday">
+                    Requested on Thursday &rarr; Next available: Sunday
+                  </option>
+                  <option value="Friday">
+                    Requested on Friday &rarr; Next available: Monday
+                  </option>
+                  <option value="Saturday">
+                    Requested on Saturday &rarr; Next available: Tuesday
+                  </option>
+                </select>
+                <p
+                  id="cooldownResult"
+                  style="font-size: 0.85rem; margin-top: 8px; color: var(--tx)"
+                >
+                  Selected: Next request unlocks in 3 days.
+                </p>
+              </div>
+            </div>
+
+            <div class="rule-box warning">
+              <h3>Unauthorized Distribution Rule</h3>
+              <p>
+                UNAUTHORIZED DISTRIBUTION OF ANY SOFTWARE IS STRICTLY
+                PROHIBITED. Violations result in immediate termination,
+                regardless of immunity roles. Distribution requires explicit
+                owner permission &amp; strict guideline compliance.
+              </p>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer>
+        <div class="wrap">
+          <span>&copy; 2026 CRACKED IRIS Community</span>
+          <span>Email Requests: cracked.iris0992@gmail.com</span>
+        </div>
+      </footer>
+    </div>
+
+    <!-- Interactive Mini-Game Dialog -->
+    <dialog id="game" aria-label="Iris Snap Game">
+      <div class="dh">
+        <h3>Iris Snap Mini-Game</h3>
+        <button class="btn gh sm" id="x">Close</button>
+      </div>
+      <div class="hud">
+        <span>Score: <b id="score">0</b></span>
+        <span>Time: <b id="time">20</b>s</span>
+      </div>
+      <div id="stage">
+        <div id="go">
+          <p id="res">
+            20 seconds. Tap every glowing iris before it shrinks away.
+          </p>
+          <button class="btn pri" id="st">Start Game</button>
+        </div>
+      </div>
+    </dialog>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast" role="status"></div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
