@@ -242,77 +242,106 @@ window.addEventListener("DOMContentLoaded", () => {
   const loader = $("#loader");
   const appContent = $("#appContent");
   const loaderText = $("#loaderText");
-  const loaderEye = $(".loader-eye");
   const prefersReducedMotion = window.matchMedia(
     "(prefers-reduced-motion: reduce)",
   ).matches;
   let userInteracted = false;
-  ["pointerdown", "keydown"].forEach((eventName) =>
-    window.addEventListener(eventName, () => (userInteracted = true), {
-      once: true,
-      passive: true,
-    }),
-  );
+  let typingStarted = false;
+  const loaderStartedAt = performance.now();
 
-  function playCrackSound() {
+  function startKeyboardTyping() {
+    if (
+      typingStarted ||
+      prefersReducedMotion ||
+      !userInteracted ||
+      loader.classList.contains("hidden")
+    )
+      return;
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     if (!AudioContext) return;
 
+    typingStarted = true;
     try {
       const context = new AudioContext();
-      const now = context.currentTime;
       const master = context.createGain();
-      master.gain.value = 0.35;
+      master.gain.value = 0.22;
       master.connect(context.destination);
 
-      const buffer = context.createBuffer(
+      const clickBuffer = context.createBuffer(
         1,
-        Math.floor(context.sampleRate * 0.24),
+        Math.floor(context.sampleRate * 0.035),
         context.sampleRate,
       );
-      const noise = buffer.getChannelData(0);
-      for (let i = 0; i < noise.length; i++) {
-        noise[i] = (Math.random() * 2 - 1) * (1 - i / noise.length);
+      const noise = clickBuffer.getChannelData(0);
+      for (let index = 0; index < noise.length; index++) {
+        const decay = Math.exp(-(index / context.sampleRate) * 95);
+        noise[index] = (Math.random() * 2 - 1) * decay;
       }
-      const snap = context.createBufferSource();
-      const filter = context.createBiquadFilter();
-      const snapGain = context.createGain();
-      snap.buffer = buffer;
-      filter.type = "bandpass";
-      filter.frequency.value = 1450;
-      filter.Q.value = 0.7;
-      snapGain.gain.setValueAtTime(0.0001, now);
-      snapGain.gain.linearRampToValueAtTime(0.75, now + 0.008);
-      snapGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
-      snap.connect(filter);
-      filter.connect(snapGain);
-      snapGain.connect(master);
-      snap.start(now);
-      snap.stop(now + 0.24);
-
-      const thump = context.createOscillator();
-      const thumpGain = context.createGain();
-      thump.type = "sine";
-      thump.frequency.setValueAtTime(105, now);
-      thump.frequency.exponentialRampToValueAtTime(42, now + 0.12);
-      thumpGain.gain.setValueAtTime(0.0001, now);
-      thumpGain.gain.linearRampToValueAtTime(0.45, now + 0.006);
-      thumpGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.14);
-      thump.connect(thumpGain);
-      thumpGain.connect(master);
-      thump.start(now);
-      thump.stop(now + 0.15);
 
       context.resume().catch(() => {});
-      setTimeout(() => context.close().catch(() => {}), 500);
+      const elapsed = performance.now() - loaderStartedAt;
+      const keyInterval = 20;
+      let finalKeyAt = 0;
+
+      document.querySelectorAll(".tw-02__line").forEach((line) => {
+        const length = Number(line.style.getPropertyValue("--len"));
+        const delay =
+          Number.parseFloat(line.style.getPropertyValue("--delay")) * 1000;
+
+        for (let index = 0; index < length; index++) {
+          if (index % 2 !== 0) continue;
+          const keyDelay = delay + index * keyInterval - elapsed;
+          if (keyDelay < 0) continue;
+          finalKeyAt = Math.max(finalKeyAt, keyDelay);
+          setTimeout(() => {
+            const startedAt = context.currentTime;
+            const key = context.createBufferSource();
+            const filter = context.createBiquadFilter();
+            const clickGain = context.createGain();
+            key.buffer = clickBuffer;
+            filter.type = "bandpass";
+            filter.frequency.value = 1900 + Math.random() * 1300;
+            filter.Q.value = 1.1;
+            clickGain.gain.setValueAtTime(0.0001, startedAt);
+            clickGain.gain.linearRampToValueAtTime(
+              0.16 + Math.random() * 0.08,
+              startedAt + 0.001,
+            );
+            clickGain.gain.exponentialRampToValueAtTime(
+              0.0001,
+              startedAt + 0.028,
+            );
+            key.connect(filter);
+            filter.connect(clickGain);
+            clickGain.connect(master);
+            key.start(startedAt);
+            key.stop(startedAt + 0.035);
+          }, keyDelay);
+        }
+      });
+
+      setTimeout(
+        () => context.close().catch(() => {}),
+        finalKeyAt + 100,
+      );
     } catch (error) {
       // Audio is optional and may be unavailable or blocked by the browser.
     }
   }
 
+  ["pointerdown", "keydown"].forEach((eventName) =>
+    window.addEventListener(
+      eventName,
+      () => {
+        userInteracted = true;
+        startKeyboardTyping();
+      },
+      { once: true, passive: true },
+    ),
+  );
+
   function releaseIris() {
     if (loaderText) loaderText.textContent = "ACCESS GRANTED.";
-    if (loaderEye) loaderEye.classList.add("cracked");
 
     setTimeout(
       () => {
@@ -331,25 +360,42 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     if (loaderText) loaderText.textContent = "VAULT OPEN";
-    if (loaderEye) {
-      loaderEye.classList.add("fracturing");
-      playCrackSound();
-      if (userInteracted) {
-        try {
-          navigator.vibrate?.([35, 45, 70]);
-        } catch (error) {
-          // Haptics are optional and may be unavailable or blocked by the browser.
-        }
-      }
-    } else {
-      playCrackSound();
-    }
     setTimeout(releaseIris, 520);
   }, 1200);
 });
 
 // Email Contact Target
 const TORRENT_EMAIL = "cracked.iris0992@gmail.com";
+const YOUTUBE_HOSTS = new Set([
+  "youtube.com",
+  "www.youtube.com",
+  "m.youtube.com",
+  "music.youtube.com",
+  "youtu.be",
+]);
+
+function openGmailCompose(subject, body) {
+  const composeUrl = new URL("https://mail.google.com/mail/");
+  composeUrl.searchParams.set("view", "cm");
+  composeUrl.searchParams.set("fs", "1");
+  composeUrl.searchParams.set("to", TORRENT_EMAIL);
+  composeUrl.searchParams.set("su", subject);
+  composeUrl.searchParams.set("body", body);
+  window.open(composeUrl.href, "_blank", "noopener,noreferrer");
+}
+
+function isYouTubeShareLink(value) {
+  try {
+    const url = new URL(value);
+    return (
+      url.protocol === "https:" &&
+      !url.port &&
+      YOUTUBE_HOSTS.has(url.hostname.toLowerCase())
+    );
+  } catch {
+    return false;
+  }
+}
 
 // Stock Item Catalog
 const items = [
@@ -412,10 +458,10 @@ function render() {
     ? l
         .map(
           (x) => `
-    <article class="card" data-i="${x.i}" style="--h:${x.h}" tabindex="0" role="button" aria-label="Request email torrent for ${x.t}">
+    <article class="card" data-i="${x.i}" style="--h:${x.h}" tabindex="0" role="button" aria-label="${x.k === "media" ? "Open YouTube link request for" : "Request Gmail draft for"} ${x.t}">
       <i>${x.t[0]}</i>
       <span class="tag">${x.k === "game" ? "Game" : x.k === "film" ? "Movie" : "Media"}</span>
-      <button class="dl" aria-label="Email Request for ${x.t}">${dlI}</button>
+      <button class="dl" aria-label="${x.k === "media" ? "Enter YouTube link for" : "Open Gmail draft for"} ${x.t}">${dlI}</button>
       <span class="pl">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
       </span>
@@ -443,16 +489,57 @@ function act(e) {
   if (!c) return;
   const x = items[c.dataset.i];
 
-  const subject = encodeURIComponent(`Torrent Request: ${x.t}`);
-  const body = encodeURIComponent(
+  if (x.k === "media") {
+    $("#mediaItemName").value = x.t;
+    $("#mediaLink").value = "";
+    $("#mediaLinkStatus").textContent = "";
+    $("#mediaRequestDialog").showModal();
+    $("#mediaLink").focus();
+    return;
+  }
+
+  openGmailCompose(
+    `Torrent Request: ${x.t}`,
     `Hello Cracked Iris Team,\n\nI would like to request the torrent file / magnet link for:\nTitle: ${x.t}\nCategory: ${x.g}\n\nThank you!`,
   );
-
-  window.location.href = `mailto:${TORRENT_EMAIL}?subject=${subject}&body=${body}`;
-  toast(
-    `Opening email client to request "${x.t}" from ${TORRENT_EMAIL}...`,
-  );
+  toast(`Opening a Gmail draft to request "${x.t}"...`);
 }
+
+const mediaRequestDialog = $("#mediaRequestDialog");
+$("#closeMediaRequest").addEventListener("click", () =>
+  mediaRequestDialog.close(),
+);
+$("#cancelMediaRequest").addEventListener("click", () =>
+  mediaRequestDialog.close(),
+);
+$("#mediaRequestForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const link = $("#mediaLink").value.trim();
+
+  if (!isYouTubeShareLink(link)) {
+    $("#mediaLinkStatus").textContent =
+      "Enter a valid HTTPS share link from YouTube or youtu.be.";
+    $("#mediaLink").setAttribute("aria-invalid", "true");
+    return;
+  }
+
+  $("#mediaLink").removeAttribute("aria-invalid");
+  const title = $("#mediaItemName").value;
+  const body = `Hello Cracked Iris Team,\n\nI would like to request media for:\nTitle: ${title}\nYouTube link: ${link}\n\nThank you!`;
+  openGmailCompose(`YouTube Media Request: ${title}`, body);
+  mediaRequestDialog.close();
+  toast("Opened a Gmail draft in a new tab. Review it and press Send.");
+});
+
+$("#requestForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const formData = new FormData(event.currentTarget);
+  const body = [...formData.entries()]
+    .map(([label, value]) => `${label}: ${String(value).trim()}`)
+    .join("\n");
+  openGmailCompose("Out of Stock Request", body);
+  toast("Opened a Gmail draft in a new tab. Review it and press Send.");
+});
 
 $("#grid").addEventListener("click", act);
 $("#grid").addEventListener("keydown", (e) => {
@@ -502,6 +589,23 @@ $("#themeBtn").addEventListener("click", () => {
 
 const navToggle = $("#navToggle");
 const navLinks = $("#navLinks");
+const heroIris = $(".hero-logo-img");
+let heroIrisResetTimer;
+
+heroIris.addEventListener("click", () => {
+  heroIris.classList.remove("is-reacting");
+  void heroIris.offsetWidth;
+  heroIris.classList.add("is-reacting");
+  clearTimeout(heroIrisResetTimer);
+  heroIrisResetTimer = setTimeout(
+    () => heroIris.classList.remove("is-reacting"),
+    650,
+  );
+
+  try {
+    navigator.vibrate?.([12, 20, 12]);
+  } catch (error) {}
+});
 
 function closeMobileNav() {
   if (!navLinks || !navToggle) return;
