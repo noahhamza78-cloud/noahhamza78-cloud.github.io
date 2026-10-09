@@ -182,11 +182,11 @@
           <!-- Static, Hovering Eye Hero Display -->
           <div class="hero-logo-container">
             <div class="hero-glow-ring"></div>
-            <div
+            <button
+              type="button"
               class="hero-logo-img"
-              role="img"
-              aria-label="Official Cracked Iris Emblem"
-            ></div>
+              aria-label="Pulse the Official Cracked Iris Emblem"
+            ></button>
           </div>
         </div>
 
@@ -217,7 +217,9 @@
             >
               <a
                 class="btn pri"
-                href="mailto:cracked.iris0992@gmail.com?subject=Torrent%20Request"
+                href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=cracked.iris0992%40gmail.com&amp;su=Torrent%20Request"
+                target="_blank"
+                rel="noopener noreferrer"
                 >Email Torrent Request</a
               >
               <a
@@ -242,16 +244,16 @@
         <section id="torrents">
           <h2>Available Torrents &amp; Stock</h2>
           <p class="sub">
-            Click any item or download button to automatically generate an email
-            request for that torrent.
+            Click a stock item to start a request. Media items ask for a YouTube
+            share link before opening a Gmail draft.
           </p>
 
           <div class="email-notice">
             <div class="email-notice-text">
-              <b>Direct Email Torrent Requests Active</b>
+              <b>Gmail Request Drafts</b>
               <p style="font-size: 0.9rem; color: var(--mut)">
-                All torrent requests are sent directly to our team inbox. Click
-                any item below or email us manually:
+                Stock requests open a Gmail draft addressed to our team inbox.
+                Review and send it from Gmail:
               </p>
             </div>
             <div style="display: flex; gap: 10px; align-items: center">
@@ -300,17 +302,14 @@
               </div>
               <a
                 class="btn pri"
-                href="mailto:cracked.iris0992@gmail.com?subject=Out%20of%20Stock%20Request&body=Name%3A%20%0D%0ARequested%20Item%3A%20%0D%0AType%3A%20Game%20/%20Movie%20/%20Music%20/%20Other%0D%0APlatform%3A%20%0D%0AReason%20or%20notes%3A%20"
+                href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=cracked.iris0992%40gmail.com&amp;su=Out%20of%20Stock%20Request&amp;body=Name%3A%20%0D%0ARequested%20Item%3A%20%0D%0AType%3A%20Game%20%2F%20Movie%20%2F%20Music%20%2F%20Other%0D%0APlatform%3A%20%0D%0AReason%20or%20notes%3A%20"
+                target="_blank"
+                rel="noopener noreferrer"
                 >Request Item</a
               >
             </div>
 
-            <form
-              class="request-form"
-              action="mailto:cracked.iris0992@gmail.com"
-              method="post"
-              enctype="text/plain"
-            >
+            <form class="request-form" id="requestForm">
               <div class="field">
                 <label for="req-name">Your name</label>
                 <input
@@ -557,6 +556,55 @@
           <button class="btn pri" id="st">Start Game</button>
         </div>
       </div>
+    </dialog>
+
+    <dialog
+      class="media-request-dialog"
+      id="mediaRequestDialog"
+      aria-labelledby="mediaRequestTitle"
+    >
+      <div class="dh">
+        <h3 id="mediaRequestTitle">Request YouTube media</h3>
+        <button class="btn gh sm" id="closeMediaRequest" type="button">
+          Close
+        </button>
+      </div>
+      <p>
+        Paste a YouTube share link. A Gmail draft addressed to
+        cracked.iris0992@gmail.com will open in a new tab for you to review and
+        send.
+      </p>
+      <form class="media-request-form" id="mediaRequestForm">
+        <input id="mediaItemName" name="Requested item" type="hidden" />
+        <div class="field">
+          <label for="mediaLink">YouTube share link</label>
+          <input
+            id="mediaLink"
+            name="YouTube link"
+            type="url"
+            inputmode="url"
+            autocomplete="url"
+            placeholder="https://youtu.be/..."
+            aria-describedby="mediaLinkHint mediaLinkStatus"
+            required
+          />
+          <small id="mediaLinkHint"
+            >On YouTube, choose Share, then Copy link.</small
+          >
+        </div>
+        <p
+          id="mediaLinkStatus"
+          class="media-link-status"
+          role="status"
+          aria-live="polite"
+        ></p>
+        <div class="media-request-actions">
+          <button class="btn gh sm" id="cancelMediaRequest" type="button">
+            Cancel
+          </button>
+          <button class="btn pri" type="submit">Open Gmail draft</button>
+        </div>
+      </form>
     </dialog>
 
     <!-- Toast Notification -->
