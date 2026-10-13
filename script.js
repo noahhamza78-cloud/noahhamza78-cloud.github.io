@@ -419,6 +419,12 @@ const items = [
     h: 340,
   },
   {
+    t: "Resident Evil 5 Gold Edition",
+    k: "game",
+    g: "Survival Horror / Co-op",
+    h: 310,
+  },
+  {
     t: "Welcome to the Jungle (2026)",
     k: "film",
     g: "Action / Adventure",
@@ -705,329 +711,56 @@ dlg.addEventListener("close", () => {
 $("#hp").onclick = () => dlg.showModal();
 
 /* =========================================================
-   BACKGROUND MUSIC (generated in the browser, no audio files)
+   LOOPING BACKGROUND MUSIC
    ========================================================= */
-const Music = (() => {
-  let ac,
-    out,
-    dly,
-    bus,
-    wetIn,
-    noiseBuf,
-    timer,
-    cur = 0,
-    bar = 0,
-    nextT = 0,
-    gen = 0,
-    live = false;
-  const hz = (m) => 440 * 2 ** ((m - 69) / 12);
-  const pick = (a) => a[Math.floor(Math.random() * a.length)];
-  const P = [
-    [48, 55, 59, 64],
-    [45, 52, 55, 60],
-    [41, 48, 52, 57],
-    [43, 50, 52, 59],
-  ];
-  const PENT = [60, 62, 64, 67, 69, 72, 74, 76, 79];
+const backgroundMusic = new Audio("background_music1.mp3");
+backgroundMusic.loop = true;
+backgroundMusic.preload = "auto";
 
-  function init() {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContext) {
-      toast("Background audio is not supported in this browser.");
-      return false;
-    }
-    ac = new AudioContext();
-    out = ac.createGain();
-    out.gain.value = 0.55;
-    out.connect(ac.destination);
-    dly = ac.createDelay(1);
-    dly.delayTime.value = 0.34;
-    const fb = ac.createGain();
-    const lp = ac.createBiquadFilter();
-    fb.gain.value = 0.4;
-    lp.type = "lowpass";
-    lp.frequency.value = 2200;
-    dly.connect(lp);
-    lp.connect(fb);
-    fb.connect(dly);
-    lp.connect(out);
-    noiseBuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
-    const data = noiseBuf.getChannelData(0);
-    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
-    return true;
-  }
-
-  function tone(m, t, dur, o = {}) {
-    const osc = ac.createOscillator();
-    const g = ac.createGain();
-    const v = o.v ?? 0.12;
-    const a = o.a ?? 0.01;
-    osc.type = o.type || "sine";
-    osc.frequency.value = hz(m);
-    osc.detune.value = o.d || 0;
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.linearRampToValueAtTime(v, t + a);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    let node = osc;
-    if (o.f) {
-      const filter = ac.createBiquadFilter();
-      filter.type = "lowpass";
-      filter.frequency.value = o.f;
-      osc.connect(filter);
-      node = filter;
-    }
-    node.connect(g);
-    g.connect(bus);
-    if (o.s) {
-      const send = ac.createGain();
-      send.gain.value = o.s;
-      g.connect(send);
-      send.connect(wetIn);
-    }
-    osc.start(t);
-    osc.stop(t + dur + 0.05);
-  }
-
-  function hit(t, dur, v, type, freq) {
-    const source = ac.createBufferSource();
-    const filter = ac.createBiquadFilter();
-    const g = ac.createGain();
-    source.buffer = noiseBuf;
-    filter.type = type;
-    filter.frequency.value = freq;
-    g.gain.setValueAtTime(v, t);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    source.connect(filter);
-    filter.connect(g);
-    g.connect(bus);
-    source.start(t);
-    source.stop(t + dur + 0.02);
-  }
-
-  function kick(t) {
-    const osc = ac.createOscillator();
-    const g = ac.createGain();
-    osc.frequency.setValueAtTime(130, t);
-    osc.frequency.exponentialRampToValueAtTime(42, t + 0.14);
-    g.gain.setValueAtTime(0.5, t);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.25);
-    osc.connect(g);
-    g.connect(bus);
-    osc.start(t);
-    osc.stop(t + 0.3);
-  }
-
-  const TR = [
-    (b, t) => {
-      const c = P[b % 4];
-      tone(c[0] - 12, t, 5.5, { v: 0.13, a: 0.03, s: 0.3 });
-      for (let i = 0; i < 4; i++)
-        if (Math.random() < 0.75)
-          tone(pick(PENT), t + i * 1.5 + Math.random() * 0.25, 3.4, {
-            type: "triangle",
-            v: 0.13,
-            a: 0.008,
-            f: 2400,
-            s: 0.6,
-          });
-      if (b % 2 === 0)
-        c.slice(1).forEach((m, i) =>
-          tone(m + 12, t + 0.1 + i * 0.12, 4, {
-            type: "triangle",
-            v: 0.06,
-            f: 1800,
-            s: 0.5,
-          }),
-        );
-      return 6;
-    },
-    (b, t) => {
-      P[b % 4].forEach((m) =>
-        [-7, 7].forEach((d) =>
-          tone(m + 12, t, 9, {
-            type: "sawtooth",
-            v: 0.022,
-            a: 2.4,
-            d,
-            f: 700,
-            s: 0.5,
-          }),
-        ),
-      );
-      tone(pick(PENT) + 12, t + 3 + Math.random() * 3, 4, {
-        v: 0.05,
-        a: 0.5,
-        s: 0.7,
-      });
-      return 8;
-    },
-    (b, t) => {
-      const c = P[b % 4];
-      const q = 60 / 74 / 4;
-      for (let s = 0; s < 16; s++) {
-        const x = t + s * q + (s % 2 ? 0.035 : 0);
-        if (s === 0 || s === 6 || s === 10) kick(x);
-        if (s === 4 || s === 12) hit(x, 0.18, 0.3, "bandpass", 1800);
-        if (s % 2 === 0)
-          hit(x, 0.04, s % 4 ? 0.05 : 0.09, "highpass", 7000);
-        if (s === 0 || s === 8)
-          c.forEach((m) =>
-            tone(m + 12, x, 1.6, {
-              type: "triangle",
-              v: 0.06,
-              a: 0.015,
-              f: 1300,
-              s: 0.35,
-              d: Math.random() * 10 - 5,
-            }),
-          );
-        if (s === 0 || s === 10)
-          tone(c[0] - 12, x, 0.7, { v: 0.2, a: 0.01 });
-        if (s % 2 && Math.random() < 0.18)
-          tone(pick(PENT), x, 0.9, {
-            type: "triangle",
-            v: 0.07,
-            f: 1800,
-            s: 0.5,
-          });
-      }
-      return q * 16;
-    },
-    (b, t) => {
-      const c = P[b % 4];
-      c.forEach((m) => tone(m + 12, t, 9, { v: 0.04, a: 3, s: 0.6 }));
-      for (let i = 0; i < 8; i++)
-        tone(pick(c) + 24 + (Math.random() < 0.4 ? 12 : 0), t + i, 2.6, {
-          v: 0.06,
-          a: 0.01,
-          s: 0.9,
-        });
-      return 8;
-    },
-  ];
-
-  function fadeOld() {
-    if (!bus) return;
-    const t = ac.currentTime;
-    [bus, wetIn].forEach((node) => {
-      node.gain.cancelScheduledValues(t);
-      node.gain.setTargetAtTime(0, t, 0.25);
-    });
-    bus = wetIn = null;
-  }
-
-  function sched(generation) {
-    if (generation !== gen) return;
-    while (nextT < ac.currentTime + 1.5) nextT += TR[cur](bar++, nextT);
-    timer = setTimeout(() => sched(generation), 400);
-  }
-
-  function play(index) {
-    if (!ac && !init()) return;
-    ac.resume();
-    gen++;
-    clearTimeout(timer);
-    fadeOld();
-    live = index >= 0;
-    if (index < 0) return;
-    cur = index;
-    bar = 0;
-    nextT = ac.currentTime + 0.1;
-    bus = ac.createGain();
-    bus.connect(out);
-    wetIn = ac.createGain();
-    wetIn.connect(dly);
-    sched(gen);
-  }
-
-  document.addEventListener("visibilitychange", () => {
-    if (!ac) return;
-    if (document.hidden) ac.suspend();
-    else if (live) ac.resume();
-  });
-  return { play };
-})();
-
-const TRACKS = [
-  ["Blocky Calm", "Soft, sparse piano"],
-  ["Calm Pad", "Warm floating ambience"],
-  ["Lo-fi Chill", "Mellow beat"],
-  ["Night Sky", "Dreamy and shimmering"],
-];
-const mBox = $("#music");
-const mBtn = $("#musicBtn");
-const mMenu = $("#musicMenu");
-let song = 0;
-let started = false;
+const musicButton = $("#musicBtn");
+let musicEnabled = true;
 try {
-  const savedSong = localStorage.getItem("ci-music");
-  if (savedSong !== null) song = +savedSong;
-} catch (e) {}
+  musicEnabled = localStorage.getItem("ci-music") !== "off";
+} catch (error) {}
 
-mMenu.innerHTML =
-  TRACKS.map(
-    (track, index) =>
-      `<button role="menuitemradio" data-s="${index}"><span>${track[0]}<small>${track[1]}</small></span></button>`,
-  ).join("") +
-  '<button role="menuitemradio" data-s="-1"><span>Music off</span></button>';
-
-function paintMusic() {
-  mBtn.classList.toggle("on", song >= 0);
-  mMenu
-    .querySelectorAll("button")
-    .forEach((button) =>
-      button.setAttribute("aria-checked", +button.dataset.s === song),
-    );
+function paintMusicButton() {
+  musicButton.classList.toggle("on", musicEnabled);
+  musicButton.setAttribute("aria-pressed", String(musicEnabled));
+  const label = `Turn background music ${musicEnabled ? "off" : "on"}`;
+  musicButton.setAttribute("aria-label", label);
+  musicButton.title = label;
 }
 
-function setSong(index) {
-  song = index;
-  started = true;
-  Music.play(index);
-  paintMusic();
+function startBackgroundMusic() {
+  if (!musicEnabled || !backgroundMusic.paused) return;
+  backgroundMusic.play().catch(() => {});
+}
+
+function setMusicEnabled(enabled) {
+  musicEnabled = enabled;
+  paintMusicButton();
   try {
-    localStorage.setItem("ci-music", index);
-  } catch (e) {}
-  toast(index < 0 ? "Music off" : `Now playing: ${TRACKS[index][0]}`);
+    localStorage.setItem("ci-music", musicEnabled ? "on" : "off");
+  } catch (error) {}
+
+  if (musicEnabled) {
+    startBackgroundMusic();
+    toast("Background music on");
+  } else {
+    backgroundMusic.pause();
+    toast("Background music off");
+  }
 }
 
-paintMusic();
-const armMusic = () => {
-  if (started) return;
-  started = true;
-  if (song >= 0) {
-    Music.play(song);
-    toast(
-      `Now playing: ${TRACKS[song][0]} (tap the note button to change)`,
-    );
-  }
-};
+paintMusicButton();
+startBackgroundMusic();
 ["pointerdown", "keydown"].forEach((eventName) =>
-  addEventListener(eventName, armMusic, { once: true, passive: true }),
+  window.addEventListener(eventName, startBackgroundMusic, {
+    passive: true,
+  }),
 );
-
-mBtn.addEventListener("click", () => {
-  const open = mBox.classList.toggle("open");
-  mBtn.setAttribute("aria-expanded", String(open));
-});
-mMenu.addEventListener("click", (event) => {
-  const button = event.target.closest("button");
-  if (!button) return;
-  setSong(+button.dataset.s);
-  mBox.classList.remove("open");
-  mBtn.setAttribute("aria-expanded", "false");
-});
-document.addEventListener("click", (event) => {
-  if (!mBox.contains(event.target)) {
-    mBox.classList.remove("open");
-    mBtn.setAttribute("aria-expanded", "false");
-  }
-});
-document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") {
-    mBox.classList.remove("open");
-    mBtn.setAttribute("aria-expanded", "false");
-  }
-});
+musicButton.addEventListener("click", () =>
+  setMusicEnabled(!musicEnabled),
+);
 
 render();
